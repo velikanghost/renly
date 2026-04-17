@@ -1,0 +1,19 @@
+{
+  "name": "renly",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Prompt → Live SaaS in 60 Seconds — powered by BuildWithLocus",
+  "scripts": {
+    "dev": "turbo dev",
+    "build": "turbo build",
+    "lint": "turbo lint",
+    "dev:web": "turbo dev --filter=@renly/web",
+    "dev:api": "turbo dev --filter=@renly/api",
+    "build:web": "turbo build --filter=@renly/web",
+    "build:api": "turbo build --filter=@renly/api"
+  },
+  "dependencies": {
+    "turbo": "^2.9.6"
+  },
+  "packageManager": "pnpm@10.32.1"
+}
