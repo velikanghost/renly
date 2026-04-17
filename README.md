@@ -1,4 +1,4 @@
-# 🚀 Renly — Prompt → Live SaaS in 60 Seconds
+# Renly
 
 An AI-powered platform that generates, deploys, and evolves full-stack applications instantly using **Anthropic Claude** and **BuildWithLocus**.
 
@@ -12,15 +12,15 @@ An AI-powered platform that generates, deploys, and evolves full-stack applicati
 
 ## Tech Stack
 
-| Layer | Technology |
-|-------|-----------|
-| Dashboard | Next.js 15, TailwindCSS v4 |
-| Backend | NestJS |
-| AI | Anthropic Claude |
-| State | Zustand |
-| Data Fetching | TanStack React Query |
-| Deploy Target | BuildWithLocus PaaS |
-| Monorepo | Turborepo + pnpm |
+| Layer         | Technology                 |
+| ------------- | -------------------------- |
+| Dashboard     | Next.js 15, TailwindCSS v4 |
+| Backend       | NestJS                     |
+| AI            | Anthropic Claude           |
+| State         | Zustand                    |
+| Data Fetching | TanStack React Query       |
+| Deploy Target | BuildWithLocus PaaS        |
+| Monorepo      | Turborepo + pnpm           |
 
 ## Getting Started
 
@@ -56,6 +56,7 @@ renly/
 ## Environment Variables
 
 ### `apps/api/.env`
+
 ```
 ANTHROPIC_API_KEY=sk-ant-...   # Required: Claude API key
 PORT=8080                       # Default: 8080
@@ -63,6 +64,7 @@ FRONTEND_URL=http://localhost:3000
 ```
 
 ### `apps/web/.env.local`
+
 ```
 NEXT_PUBLIC_API_URL=http://localhost:8080
 ```
@@ -77,9 +79,6 @@ Renly deploys itself on Locus:
 git push locus main
 ```
 
-## Built for the BuildWithLocus Hackathon
-
-> **Hackathon Theme:** "Agents that pay, trust, cooperate, and keep secrets"  
 > Renly is an agent-native platform where AI autonomously provisions cloud infrastructure through the Locus API.
 
 ---
