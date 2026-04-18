@@ -52,7 +52,10 @@ export default function AppDetailPage() {
   }
 
   const status = STATUS_MAP[app.status] || STATUS_MAP.generating;
-  const primaryUrl = Object.values(app.serviceUrls || {})[0] as string;
+  let primaryUrl = Object.values(app.serviceUrls || {})[0] as string;
+  if (primaryUrl && !primaryUrl.startsWith('http://') && !primaryUrl.startsWith('https://')) {
+    primaryUrl = `https://${primaryUrl}`;
+  }
 
   const handleIterate = (prompt: string) => {
     iterate.mutate(prompt, {
@@ -97,7 +100,7 @@ export default function AppDetailPage() {
               <div key={name} className="flex items-center justify-between">
                 <span className="text-sm text-text-muted">{name}</span>
                 <a
-                  href={url as string}
+                  href={(url as string).startsWith('http') ? (url as string) : `https://${url}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-sm text-accent hover:underline truncate ml-4"

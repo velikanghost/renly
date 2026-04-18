@@ -62,6 +62,10 @@ export class LocusApiService {
       environmentId: string;
       name: string;
       source?: any;
+      buildConfig?: any;
+      runtime?: any;
+      healthCheckPath?: string;
+      autoDeploy?: boolean;
     },
   ): Promise<{ id: string; url?: string }> {
     return this.request('POST', '/services', token, data);

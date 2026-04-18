@@ -62,12 +62,68 @@ export class DeployService {
       environmentId = env.id;
     }
 
-    // Step 4: Push code
+    // Step 4: Create service(s) — required before git push
+    const hasBackend = files.some((f) => f.path.startsWith('backend/'));
+
+    notify('service', 'Creating web service...');
+    const webService = await this.locusApi.createService(token, {
+      projectId: project.id,
+      environmentId,
+      name: 'web',
+      source: { 
+        type: 's3',
+        rootDir: hasBackend ? 'frontend' : '.',
+      },
+      buildConfig: {
+        method: 'dockerfile',
+        dockerfile: 'Dockerfile',
+      },
+      runtime: {
+        port: 8080,
+        cpu: 256,
+        memory: 512,
+        minInstances: 1,
+        maxInstances: 1,
+      },
+      healthCheckPath: '/',
+      autoDeploy: true,
+    });
+    this.logger.log(`Created web service: ${webService.id}`);
+
+    // Check if generated code included a backend
+    if (hasBackend) {
+      notify('service', 'Creating API service...');
+      const apiService = await this.locusApi.createService(token, {
+        projectId: project.id,
+        environmentId,
+        name: 'api',
+        source: {
+          type: 's3',
+          rootDir: 'backend',
+        },
+        buildConfig: {
+          method: 'dockerfile',
+          dockerfile: 'Dockerfile',
+        },
+        runtime: {
+          port: 8080,
+          cpu: 256,
+          memory: 512,
+          minInstances: 1,
+          maxInstances: 1,
+        },
+        healthCheckPath: '/health',
+        autoDeploy: true,
+      });
+      this.logger.log(`Created API service: ${apiService.id}`);
+    }
+
+    // Step 5: Push code
     notify('pushing', 'Pushing code to Locus...');
     await this.gitPush.pushToLocus(files, token, workspaceId, project.id);
     notify('pushing', 'Code pushed successfully');
 
-    // Step 5: Poll for deployment status
+    // Step 6: Poll for deployment status
     notify('building', 'Locus is building your app... (this may take 3-7 minutes)');
     const result = await this.waitForDeployment(token, project.id, notify);
 
@@ -125,7 +181,7 @@ export class DeployService {
           url: s.url,
         }));
 
-        const allHealthy = statuses.length > 0 && statuses.every((s: any) => s.status === 'healthy');
+        const allHealthy = statuses.every((s: any) => s.status === 'healthy');
         const anyFailed = statuses.some((s: any) => s.status === 'failed');
 
         this.logger.log(
@@ -146,7 +202,12 @@ export class DeployService {
           const serviceUrls: Record<string, string> = {};
           const serviceIds: string[] = [];
           for (const s of services) {
-            serviceUrls[s.name] = s.url;
+            // Normalize URL: Locus may return bare hostnames without protocol
+            let url = s.url || '';
+            if (url && !url.startsWith('http://') && !url.startsWith('https://')) {
+              url = `https://${url}`;
+            }
+            serviceUrls[s.name] = url;
             serviceIds.push(s.id);
           }
 

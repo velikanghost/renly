@@ -89,7 +89,7 @@ function StepItem({ step, isLast }: { step: GenerationStep; isLast: boolean }) {
             {Object.entries(step.data.serviceUrls).map(([name, url]) => (
               <a
                 key={name}
-                href={url as string}
+                href={(url as string).startsWith('http') ? (url as string) : `https://${url}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="block text-xs text-accent hover:underline truncate"
