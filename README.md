@@ -1,8 +1,8 @@
-# Renly ✦ — The Locus Companion CLI
+# Renly — Locus Companion CLI
 
-> Renly is a developer utility designed to supercharge the [BuildWithLocus](https://buildwithlocus.com) ecosystem by providing a seamless, CLI-first workflow for scaffolding and deploying applications directly to Locus infrastructure.
+Renly is a developer utility designed to supercharge the [BuildWithLocus](https://buildwithlocus.com) ecosystem by providing a seamless, CLI-first workflow for scaffolding and deploying applications directly to Locus infrastructure.
 
-Renly eliminates the gap between local development and cloud deployment. It combines the power of modern scaffolding with the scale of Locus Beta.
+Renly eliminates the gap between local development and cloud deployment. It combines the power of modern scaffolding with the scale of Locus.
 
 ## Key Locus Integrations
 
