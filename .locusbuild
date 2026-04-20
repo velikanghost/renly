@@ -1,13 +1,8 @@
 {
   "services": {
-    "api": {
-      "path": "apps/api",
-      "port": 8080,
-      "healthCheck": "/health"
-    },
     "web": {
-      "path": "apps/web",
-      "port": 8080,
+      "path": "packages/web",
+      "port": 3000,
       "healthCheck": "/"
     }
   }

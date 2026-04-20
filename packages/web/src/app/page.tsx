@@ -113,9 +113,7 @@ export default function HomePage() {
               className="text-5xl md:text-7xl font-extrabold tracking-tight leading-tight"
             >
               Scaffold and Deploy <br />
-              <span className="hero-gradient italic">
-                in the blink of an eye
-              </span>
+              <span className="hero-gradient italic">native to Locus Beta</span>
             </motion.h1>
 
             <motion.p
@@ -124,9 +122,9 @@ export default function HomePage() {
               transition={{ duration: 0.5, delay: 0.2 }}
               className="text-xl max-w-2xl mx-auto text-gray-500 dark:text-gray-400"
             >
-              Renly is a CLI-first tool designed for speed. Boilerplate in
-              seconds, deploy to Locus with one command. No complex config, just
-              code.
+              Renly is the essential CLI companion for the BuildWithLocus
+              ecosystem. Bootstrap in seconds, push to production in one
+              command. Experience cloud native at the speed of thought.
             </motion.p>
 
             <motion.div
