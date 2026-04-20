@@ -136,8 +136,19 @@ export async function deploy() {
       process.exit(1);
     }
 
-    // 4. Ensure Service exists (minimal one-service assumption for CLI alpha)
+    // 4. Ensure Service exists (respect .locusbuild config)
     spinner.text = 'Syncing service configuration...';
+    const locusConfigPath = path.join(process.cwd(), '.locusbuild');
+    let serviceConfig = { port: 8080, path: '.' };
+    
+    if (await fs.pathExists(locusConfigPath)) {
+      const config = await fs.readJSON(locusConfigPath);
+      if (config.services?.web) {
+        serviceConfig.port = config.services.web.port || serviceConfig.port;
+        serviceConfig.path = config.services.web.path || serviceConfig.path;
+      }
+    }
+
     try {
       await axios.post(
         `${baseUrl}/services`,
@@ -145,8 +156,8 @@ export async function deploy() {
           projectId,
           environmentId,
           name: 'web',
-          source: { type: 's3', rootDir: '.' },
-          runtime: { port: 8080, cpu: 256, memory: 512 }
+          source: { type: 's3', rootDir: serviceConfig.path },
+          runtime: { port: serviceConfig.port, cpu: 256, memory: 512 }
         },
         { headers: { Authorization: `Bearer ${token}` } },
       )
