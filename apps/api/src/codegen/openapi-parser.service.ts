@@ -46,6 +46,7 @@ export class OpenApiParserService {
     const paths = doc.paths || {};
 
     for (const [path, methods] of Object.entries(paths)) {
+      for (const [method, detail] of Object.entries(methods as any)) {
         const operation = detail as any;
         endpoints.push({
           method: method.toUpperCase() as any,

@@ -1,7 +1,7 @@
-'use client';
+'use client'
 
-import { useGenerationStore, GenerationStep } from '@/stores/generation.store';
-import { useDeployStream } from '@/hooks/use-deploy-stream';
+import { useGenerationStore, GenerationStep } from '@/stores/generation.store'
+import { useDeployStream } from '@/hooks/use-deploy-stream'
 
 const STEP_ICONS: Record<string, string> = {
   thinking: '🧠',
@@ -15,7 +15,7 @@ const STEP_ICONS: Record<string, string> = {
   live: '🚀',
   complete: '✅',
   error: '❌',
-};
+}
 
 const STEP_COLORS: Record<string, string> = {
   thinking: 'text-accent',
@@ -28,16 +28,17 @@ const STEP_COLORS: Record<string, string> = {
   live: 'text-success',
   complete: 'text-success',
   error: 'text-error',
-};
+}
 
 export function DeployProgress() {
-  const { currentJobId, steps, isGenerating, isComplete, error } = useGenerationStore();
+  const { currentJobId, steps, isGenerating, isComplete, error } =
+    useGenerationStore()
 
   // Connect to SSE stream
-  useDeployStream(currentJobId);
+  useDeployStream(currentJobId)
 
   if (!currentJobId && steps.length === 0) {
-    return null;
+    return null
   }
 
   return (
@@ -45,17 +46,17 @@ export function DeployProgress() {
       <div className="border border-border rounded-xl bg-surface overflow-hidden">
         <div className="px-4 py-3 border-b border-border flex items-center justify-between">
           <span className="text-sm font-medium text-text">
-            {isGenerating ? 'Generating your app...' : isComplete ? 'Deployment complete' : 'Generation failed'}
+            {isGenerating
+              ? 'Generating your app...'
+              : isComplete
+                ? 'Deployment complete'
+                : 'Generation failed'}
           </span>
           {isGenerating && (
             <span className="w-2 h-2 rounded-full bg-accent animate-pulse" />
           )}
-          {isComplete && (
-            <span className="w-2 h-2 rounded-full bg-success" />
-          )}
-          {error && (
-            <span className="w-2 h-2 rounded-full bg-error" />
-          )}
+          {isComplete && <span className="w-2 h-2 rounded-full bg-success" />}
+          {error && <span className="w-2 h-2 rounded-full bg-error" />}
         </div>
 
         <div className="p-4 space-y-3 max-h-96 overflow-y-auto">
@@ -72,16 +73,18 @@ export function DeployProgress() {
         </div>
       </div>
     </div>
-  );
+  )
 }
 
 function StepItem({ step, isLast }: { step: GenerationStep; isLast: boolean }) {
-  const icon = STEP_ICONS[step.step] || '•';
-  const color = STEP_COLORS[step.step] || 'text-text-muted';
+  const icon = STEP_ICONS[step.step] || '•'
+  const color = STEP_COLORS[step.step] || 'text-text-muted'
 
   return (
-    <div className={`flex items-start gap-3 ${isLast ? 'opacity-100' : 'opacity-70'}`}>
-      <span className="text-base mt-0.5 flex-shrink-0">{icon}</span>
+    <div
+      className={`flex items-start gap-3 ${isLast ? 'opacity-100' : 'opacity-70'}`}
+    >
+      <span className="text-base mt-0.5 shrink-0">{icon}</span>
       <div className="flex-1 min-w-0">
         <p className={`text-sm ${color}`}>{step.message}</p>
         {step.data?.serviceUrls && (
@@ -89,7 +92,11 @@ function StepItem({ step, isLast }: { step: GenerationStep; isLast: boolean }) {
             {Object.entries(step.data.serviceUrls).map(([name, url]) => (
               <a
                 key={name}
-                href={(url as string).startsWith('http') ? (url as string) : `https://${url}`}
+                href={
+                  (url as string).startsWith('http')
+                    ? (url as string)
+                    : `https://${url}`
+                }
                 target="_blank"
                 rel="noopener noreferrer"
                 className="block text-xs text-accent hover:underline truncate"
@@ -100,9 +107,13 @@ function StepItem({ step, isLast }: { step: GenerationStep; isLast: boolean }) {
           </div>
         )}
       </div>
-      <span className="text-xs text-text-subtle flex-shrink-0">
-        {new Date(step.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+      <span className="text-xs text-text-subtle shrink-0">
+        {new Date(step.timestamp).toLocaleTimeString([], {
+          hour: '2-digit',
+          minute: '2-digit',
+          second: '2-digit',
+        })}
       </span>
     </div>
-  );
+  )
 }

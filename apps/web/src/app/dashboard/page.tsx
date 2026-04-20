@@ -21,7 +21,7 @@ export default function DashboardPage() {
   }, [isAuthed, router]);
 
   const handleGenerate = (prompt: string) => {
-    generate.mutate(prompt, {
+    generate.mutate({ prompt }, {
       onSuccess: () => router.push('/generate'),
     });
   };
