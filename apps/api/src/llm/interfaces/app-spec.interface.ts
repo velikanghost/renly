@@ -13,6 +13,7 @@ export interface AppSpec {
 
   features: string[];
   needsDatabase: boolean;
+  baseUrl?: string;
 }
 
 export interface PageSpec {

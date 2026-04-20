@@ -71,8 +71,14 @@ export class CodegenService {
 
       if (spec.needsDatabase) {
         config.addons = { db: { type: 'postgres' } };
-        config.services.api.env.DATABASE_URL = '${{db.DATABASE_URL}}';
+        config.services.api.env = {
+          DATABASE_URL: '${{db.DATABASE_URL}}',
+        };
       }
+    } else if (spec.type === 'frontend-only' && spec.baseUrl) {
+      config.services.web.env = {
+        VITE_API_URL: spec.baseUrl,
+      };
     }
 
     return config;
@@ -384,7 +390,7 @@ ${links}
   private generateCrudPage(page: any, model: any, spec: AppSpec): string {
     const modelName = model.name;
     const fields = model.fields || [];
-    const apiBase = spec.type === 'fullstack' ? "import.meta.env.VITE_API_URL || 'http://localhost:8080'" : "''";
+    const apiBase = spec.baseUrl ? `'${spec.baseUrl}'` : "import.meta.env.VITE_API_URL || 'http://localhost:8080'";
 
     const fieldHeaders = fields
       .map((f: any) => `          <th className="text-left py-3 px-4 text-xs font-medium uppercase text-[var(--color-text-muted)]">${f.name}</th>`)

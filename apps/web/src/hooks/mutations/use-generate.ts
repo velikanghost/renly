@@ -6,12 +6,12 @@ export function useGenerate() {
   const { startJob } = useGenerationStore();
 
   return useMutation({
-    mutationFn: async (prompt: string) => {
+    mutationFn: async (params: { prompt?: string; openApiContent?: string }) => {
       return api.post<{
         success: boolean;
         jobId: string;
         appId: string;
-      }>('/generate', { prompt });
+      }>('/generate', params);
     },
     onSuccess: (data) => {
       startJob(data.jobId, data.appId);

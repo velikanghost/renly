@@ -4,7 +4,7 @@ import { LlmService } from '../llm/llm.service';
 import { CodegenService } from '../codegen/codegen.service';
 import { DeployService } from '../deploy/deploy.service';
 import { AppsService } from '../apps/apps.service';
-import { AuthService } from '../auth/auth.service';
+import { OpenApiParserService } from '../codegen/openapi-parser.service';
 
 export interface GenerationEvent {
   step: string;
@@ -22,6 +22,7 @@ export class GenerateService {
     private readonly codegenService: CodegenService,
     private readonly deployService: DeployService,
     private readonly appsService: AppsService,
+    private readonly openApiParser: OpenApiParserService,
   ) {}
 
   /**
@@ -29,34 +30,34 @@ export class GenerateService {
    * that the frontend can subscribe to via SSE.
    */
   async startGeneration(
-    prompt: string,
+    prompt: string | undefined,
     token: string,
     workspaceId: string,
+    openApiContent?: string,
   ): Promise<{ jobId: string; appId: string }> {
     // Create SSE subject for this job
     const subject = new Subject<GenerationEvent>();
     const jobId = `job_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
     this.jobs.set(jobId, subject);
 
-    // We need to create the app entry first for the appId
-    // The pipeline will update it
+    // Initial placeholder spec
     const tempSpec = {
-      appName: 'generating...',
-      description: prompt,
-      type: 'fullstack' as const,
+      appName: 'preparing...',
+      description: prompt || 'Generating from API spec',
+      type: (openApiContent ? 'frontend-only' : 'fullstack') as any,
       pages: [],
       dataModels: [],
       apiEndpoints: [],
       features: [],
       needsDatabase: false,
     };
-    const app = this.appsService.createApp(prompt, tempSpec);
+    const app = this.appsService.createApp(prompt || 'API to App', tempSpec);
 
     // Store appId in subject metadata
     (subject as any)._appId = app.id;
 
     // Run the pipeline asynchronously
-    this.runPipeline(jobId, prompt, token, workspaceId, subject).catch((error) => {
+    this.runPipeline(jobId, prompt, token, workspaceId, subject, openApiContent).catch((error) => {
       this.logger.error(`Pipeline failed: ${error.message}`);
       subject.next({ step: 'error', message: error.message });
       subject.complete();
@@ -105,22 +106,35 @@ export class GenerateService {
 
   private async runPipeline(
     jobId: string,
-    prompt: string,
+    prompt: string | undefined,
     token: string,
     workspaceId: string,
     subject: Subject<GenerationEvent>,
+    openApiContent?: string,
   ): Promise<void> {
     const appId = (subject as any)._appId;
 
     try {
-      // Step 1: Generate spec with Claude
-      subject.next({ step: 'thinking', message: 'AI is understanding your app...' });
-      const spec = await this.llmService.generateSpec(prompt);
-      subject.next({
-        step: 'spec',
-        message: `Designed: ${spec.appName} — ${spec.pages.length} pages, ${spec.dataModels.length} models`,
-        data: { spec },
-      });
+      let spec;
+      if (openApiContent) {
+        // Step 1: Parse OpenAPI spec directly
+        subject.next({ step: 'parsing', message: 'Parsing your API specification...' });
+        spec = this.openApiParser.parse(openApiContent);
+        subject.next({
+          step: 'spec',
+          message: `Identified: ${spec.appName} — ${spec.pages.length} pages, ${spec.apiEndpoints.length} endpoints`,
+          data: { spec },
+        });
+      } else {
+        // Step 1: Generate spec with Claude
+        subject.next({ step: 'thinking', message: 'AI is understanding your app...' });
+        spec = await this.llmService.generateSpec(prompt!);
+        subject.next({
+          step: 'spec',
+          message: `Designed: ${spec.appName} — ${spec.pages.length} pages, ${spec.dataModels.length} models`,
+          data: { spec },
+        });
+      }
 
       // Update app with real spec
       this.appsService.updateSpec(appId, spec);

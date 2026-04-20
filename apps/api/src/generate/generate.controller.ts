@@ -41,6 +41,7 @@ export class GenerateController {
       dto.prompt,
       token,
       workspaceId,
+      dto.openApiContent,
     );
 
     return { success: true, jobId, appId };

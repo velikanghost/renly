@@ -4,15 +4,15 @@ import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/stores/auth.store';
 import { useGenerate } from '@/hooks/mutations/use-generate';
 import { ApiKeyInput } from '@/components/api-key-input';
-import { PromptInput } from '@/components/prompt-input';
+import { SpecInput } from '@/components/spec-input';
 
 export default function HomePage() {
   const { isAuthed } = useAuthStore();
   const router = useRouter();
   const generate = useGenerate();
 
-  const handleGenerate = (prompt: string) => {
-    generate.mutate(prompt, {
+  const handleGenerate = (params: { prompt?: string; openApiContent?: string }) => {
+    generate.mutate(params, {
       onSuccess: () => {
         router.push('/generate');
       },
@@ -30,22 +30,22 @@ export default function HomePage() {
           </div>
 
           <h1 className="text-4xl sm:text-5xl font-bold text-text tracking-tight">
-            Prompt → Live SaaS
+            API Spec → Admin UI
             <br />
             <span className="text-accent">in 60 seconds</span>
           </h1>
 
           <p className="text-base text-text-muted max-w-lg mx-auto">
-            Describe your app in plain English. Renly generates the code,
-            deploys it on Locus, and gives you a live URL — instantly.
+            Drop your Swagger/OpenAPI spec. Renly generates a functional, 
+            lightweight dashboard and deploys it on Locus instantly.
           </p>
         </div>
 
-        {/* Auth or Prompt */}
-        <div className="flex justify-center">
+        {/* Auth or Spec Input */}
+        <div className="flex justify-center text-left">
           {isAuthed ? (
-            <div className="w-full max-w-xl">
-              <PromptInput
+            <div className="w-full max-w-2xl">
+              <SpecInput
                 onSubmit={handleGenerate}
                 isLoading={generate.isPending}
               />

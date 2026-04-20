@@ -1,8 +1,12 @@
-import { IsString, IsNotEmpty, MinLength } from 'class-validator';
+import { IsString, IsOptional, IsNotEmpty, MinLength } from 'class-validator';
 
 export class CreateAppDto {
   @IsString()
-  @IsNotEmpty()
+  @IsOptional()
   @MinLength(5, { message: 'Prompt must be at least 5 characters' })
-  prompt: string;
+  prompt?: string;
+
+  @IsString()
+  @IsOptional()
+  openApiContent?: string;
 }
