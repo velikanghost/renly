@@ -1,7 +1,7 @@
 {
   "name": "@renly/cli",
   "version": "0.1.0",
-  "description": "The Renly CLI - Vercel-like experience for Locus",
+  "description": "Renly CLI — The core tool for scaffolding and deploying apps",
   "main": "dist/index.js",
   "bin": {
     "renly": "dist/index.js"

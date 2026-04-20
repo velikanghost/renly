@@ -11,7 +11,7 @@ const program = new Command();
 
 program
   .name('renly')
-  .description('Renly CLI - The Vercel-like experience for Locus')
+  .description('Renly CLI — Scaffold and deploy with ease')
   .version('0.1.0');
 
 program
