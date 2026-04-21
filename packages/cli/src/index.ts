@@ -22,8 +22,9 @@ program
 program
   .command('init')
   .description('Scaffold a new project (nextjs, nestjs)')
-  .argument('[template]', 'Template to use (nextjs | nestjs)')
-  .action(init);
+  .argument('[projectName]', 'Name of the project')
+  .option('-t, --template <template>', 'Template to use (nextjs | nestjs)')
+  .action((projectName, options) => init(projectName, options));
 
 program
   .command('deploy')

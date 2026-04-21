@@ -5,17 +5,35 @@ import fs from 'fs-extra';
 import path from 'path';
 import ora from 'ora';
 
-export async function init(templateArg?: string) {
-  const { projectName } = await (inquirer as any).prompt([
-    {
-      type: 'input',
-      name: 'projectName',
-      message: 'Project name (use "." for current folder):',
-      default: '.',
-    },
-  ]);
+export async function init(projectNameArg?: string, options: { template?: string } = {}) {
+  const VALID_TEMPLATES = ['nextjs', 'nestjs'];
 
-  let template = templateArg;
+  let projectName = projectNameArg;
+  let template = options.template;
+
+  // Smart Detection: If the first argument is a valid template name and no template option was provided
+  if (projectNameArg && VALID_TEMPLATES.includes(projectNameArg) && !template) {
+    template = projectNameArg;
+    projectName = undefined; // We'll prompt for the project name instead
+  }
+
+  if (template && !VALID_TEMPLATES.includes(template)) {
+    console.log(chalk.red(`\n✗ Error: Invalid template "${template}". Valid options are: ${VALID_TEMPLATES.join(', ')}\n`));
+    process.exit(1);
+  }
+
+  if (!projectName) {
+    const response = await (inquirer as any).prompt([
+      {
+        type: 'input',
+        name: 'projectName',
+        message: 'Project name (use "." for current folder):',
+        default: '.',
+      },
+    ]);
+    projectName = response.projectName;
+  }
+
   if (!template) {
     const response = await (inquirer as any).prompt([
       {
@@ -32,7 +50,7 @@ export async function init(templateArg?: string) {
   }
 
   const isCurrentDir = projectName === '.';
-  const projectDir = isCurrentDir ? process.cwd() : path.join(process.cwd(), projectName);
+  const projectDir = isCurrentDir ? process.cwd() : path.join(process.cwd(), projectName!);
 
   // Check if target directory is empty (if not creating a new sub-dir)
   if (isCurrentDir) {
@@ -59,14 +77,22 @@ export async function init(templateArg?: string) {
     // 1. Run official CLI
     if (template === 'nextjs') {
       execSync(
-        `npx create-next-app@latest ${projectName} --typescript --tailwind --eslint --app --src-dir --import-alias "@/*" --use-pnpm --skip-install`,
+        `npx create-next-app@latest ${projectName} --typescript --tailwind --eslint --app --src-dir --import-alias "@/*" --use-pnpm --skip-install --no-git`,
         { stdio: 'ignore' }
       );
-    } else {
+    } else if (template === 'nestjs') {
       execSync(
         `npx @nestjs/cli new ${projectName} --package-manager pnpm --skip-install --skip-git`,
         { stdio: 'ignore' }
       );
+    }
+
+    // 1.5. Clean up .git directory if it was created (consistency fallback)
+    if (!isCurrentDir) {
+      const dotGit = path.join(projectDir, '.git');
+      if (await fs.pathExists(dotGit)) {
+        await fs.remove(dotGit);
+      }
     }
 
     // 2. Overlay Locus config
@@ -123,20 +149,22 @@ async function configureNextStandalone(dir: string) {
 }
 
 function getNextjsDockerfile() {
-  return `FROM node:20-slim AS base
+  return `ARG STAGE_BASE=base
+FROM node:20-slim AS base
 
-FROM base AS deps
+# Install dependencies only when needed
+FROM \${STAGE_BASE} AS deps
 WORKDIR /app
 COPY package.json pnpm-lock.yaml* ./
 RUN corepack enable pnpm && pnpm i --frozen-lockfile
 
-FROM base AS builder
+FROM \${STAGE_BASE} AS builder
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 RUN npm run build
 
-FROM base AS runner
+FROM \${STAGE_BASE} AS runner
 WORKDIR /app
 ENV NODE_ENV production
 ENV PORT 8080
