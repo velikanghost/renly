@@ -1,4 +1,4 @@
-# Renly — Commercial Potential & Business Strategy
+# Renly
 
 ## 1. Executive Summary
 
